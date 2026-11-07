@@ -52,6 +52,8 @@ determines which versions can connect.
 
 ### Fixed
 
+- `press` supplies US keyboard codes and virtual key codes for ASCII punctuation,
+  allowing editor shortcuts such as `Ctrl+/`, `Ctrl+]` and `Ctrl+[` to work.
 - Main-document SPA route changes, including away-and-back and hash routes,
   invalidate old control contexts and refs. Supplementary reads never renew them.
   This also covers passive reads of already loaded tabs and fresh debugger attachments.

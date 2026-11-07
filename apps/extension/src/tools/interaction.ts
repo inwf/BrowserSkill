@@ -1635,6 +1635,35 @@ for (let i = 1; i <= 12; i++) {
   };
 }
 
+const PUNCTUATION_KEYS = new Map<string, Pick<KeyDescriptor, "code" | "windowsVirtualKeyCode">>();
+for (const [characters, code, windowsVirtualKeyCode] of [
+  [";:", "Semicolon", 186],
+  ["=+", "Equal", 187],
+  [",<", "Comma", 188],
+  ["-_", "Minus", 189],
+  [".>", "Period", 190],
+  ["/?", "Slash", 191],
+  ["`~", "Backquote", 192],
+  ["[{", "BracketLeft", 219],
+  ["\\|", "Backslash", 220],
+  ["]}", "BracketRight", 221],
+  ["'\"", "Quote", 222],
+  [")", "Digit0", 48],
+  ["!", "Digit1", 49],
+  ["@", "Digit2", 50],
+  ["#", "Digit3", 51],
+  ["$", "Digit4", 52],
+  ["%", "Digit5", 53],
+  ["^", "Digit6", 54],
+  ["&", "Digit7", 55],
+  ["*", "Digit8", 56],
+  ["(", "Digit9", 57],
+] as const) {
+  for (const character of characters) {
+    PUNCTUATION_KEYS.set(character, { code, windowsVirtualKeyCode });
+  }
+}
+
 /**
  * Translate a logical key name (`Enter`, `a`, `3`, `F5`, `ArrowDown`)
  * into the CDP `Input.dispatchKeyEvent` descriptor. Returns `null`
@@ -1669,8 +1698,10 @@ export function resolveKeyDescriptor(key: string): KeyDescriptor | null {
         windowsVirtualKeyCode: ch.charCodeAt(0),
       };
     }
-    // Common punctuation falls back to `text` only. Browsers
-    // synthesise the right code from `text` when CDP can't find one.
+    // 与字母、数字相同，ASCII 标点使用 US 键位；修饰键由调用方指定。
+    const punctuation = PUNCTUATION_KEYS.get(ch);
+    if (punctuation) return { key: ch, text: ch, ...punctuation };
+    // 其他字符保留文本输入，不推断其物理键位。
     return { key: ch, code: "", text: ch };
   }
   return null;
